@@ -1,6 +1,6 @@
 from flask import Flask, send_from_directory, json, request, Response
 from flask_restful import Api, Resource, reqparse
-from flask_cors import CORS, cross_origin #comment this on deployment
+from flask_cors import CORS #comment this on deployment
 
 app = Flask(__name__, static_url_path='', static_folder='frontend/build')
 CORS(app) #comment this on deployment
@@ -17,19 +17,16 @@ def readMini(path):
     return json.load(miniDB)
 
 @app.route("/")
-@cross_origin
 def index():
     return send_from_directory(app.static_folder,'index.html')
 
 @app.route('/returnlist', methods=['GET'])
-@cross_origin
 def get_everything():
     path = "/Users/daveg/Desktop/Computer Science/BostonHacks/DaveG_BostonHacksChallenge/miniDatabase.json"
     existing_json = readMini(path)
     return json.dumps(existing_json)
 
 @app.route('/addtolist', methods=['POST'])
-@cross_origin
 def add_item():
 
     #get the json post data
@@ -46,7 +43,6 @@ def add_item():
     return {request_name: "ADDED"}
 
 @app.route('/deleteitem', methods=['POST'])
-@cross_origin
 def remove_item():
     path = "/Users/daveg/Desktop/Computer Science/BostonHacks/DaveG_BostonHacksChallenge/miniDatabase.json"
     currentValue = readMini(path)
