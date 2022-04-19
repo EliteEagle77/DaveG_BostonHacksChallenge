@@ -9,7 +9,7 @@ function App() {
 
   //do this all the time
   useEffect(()=>{
-    axios.get('http://localhost:5000/returnlist').then(response => {
+    axios.get('https://secure-dusk-68936.herokuapp.com/returnlist').then(response => {
       console.log("SUCCESS", response)
       setGetMessage(response)
       console.log(response)
@@ -21,7 +21,7 @@ function App() {
 
   //delete function
   function deleteTodo(name) {
-    axios.post('http://localhost:5000/deleteitem', {
+    axios.post('https://secure-dusk-68936.herokuapp.com/deleteitem', {
       name: name
     }).then(response => {
       console.log(response);
@@ -38,7 +38,7 @@ function App() {
     if ( !addThisTodo.value.trim().length) {
       alert("There is nothing in that text box!")
     } else {
-      axios.post('http://localhost:5000/addtolist', {
+      axios.post('https://secure-dusk-68936.herokuapp.com/addtolist', {
         name: addThisTodo.value,
         status: "NOTDONE"
       }).then(response => {
