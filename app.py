@@ -1,46 +1,61 @@
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, json, request, Response
 from flask_restful import Api, Resource, reqparse
-from flask_cors import CORS #comment this on deployment
+from flask_cors import CORS, cross_origin #comment this on deployment
 
 app = Flask(__name__, static_url_path='', static_folder='frontend/build')
 CORS(app) #comment this on deployment
 api = Api(app)
 
+# writing to the mini database
+def writeMini(path, data):
+    miniDB = open(path, 'w')
+    json.dump(data, miniDB)
+
+#reading the mini database
+def readMini(path):
+    miniDB = open(path) 
+    return json.load(miniDB)
+
 @app.route("/")
+@cross_origin
 def index():
     return send_from_directory(app.static_folder,'index.html')
 
-@app.route('/hello', methods=['GET'])
-def helloWorld():
-    return {
-        'resultStatus': 'SUCCESS',
-        'message': "Hello Api Handler!"
-    }
+@app.route('/returnlist', methods=['GET'])
+@cross_origin
+def get_everything():
+    path = "/Users/daveg/Desktop/Computer Science/BostonHacks/DaveG_BostonHacksChallenge/miniDatabase.json"
+    existing_json = readMini(path)
+    return json.dumps(existing_json)
 
-@app.route('/update', methods=['POST'])
-def updateTodo():
-    parser = reqparse.RequestParser()
-    parser.add_argument('type', type=str)
-    parser.add_argument('message', type=str)
+@app.route('/addtolist', methods=['POST'])
+@cross_origin
+def add_item():
 
-    args = parser.parse_args()
+    #get the json post data
+    path = "/Users/daveg/Desktop/Computer Science/BostonHacks/DaveG_BostonHacksChallenge/miniDatabase.json"
+    request_data = request.get_json()
+    request_status = request_data['status']
+    request_name = request_data['name']
 
-    print(args)
+    #add it to the json file
+    currentValue = readMini(path)
+    newItem = {'name': request_name, 'status': request_status}
+    currentValue.append(newItem)
+    writeMini(path, currentValue)
+    return {request_name: "ADDED"}
 
-    request_type = args['type']
-    request_msg = args['message']
-    
-    # currently just returning the request straight back
-    if request_msg:
-        ret_msg = "Your Message: {}".format(request_msg)
-    else:
-        ret_msg = "No Message"
+@app.route('/deleteitem', methods=['POST'])
+@cross_origin
+def remove_item():
+    path = "/Users/daveg/Desktop/Computer Science/BostonHacks/DaveG_BostonHacksChallenge/miniDatabase.json"
+    currentValue = readMini(path)
+    request_data = request.get_json()
+    request_name = request_data['name']
 
-    if ret_msg:
-        ret_type = "Your Type: {}".format(request_type)
-    else:
-        ret_type = "No Type"
-    
-    final_ret = {"status": "Success", "message": ret_msg, "type": ret_type}
+    #remove the key      
+    updatedValue = [todo for todo in currentValue if not (todo['name'] == request_name)]    
+    writeMini(path, updatedValue)
 
-    return final_ret
+    return {request_name: "DELETED"}
+
